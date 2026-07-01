@@ -2,6 +2,7 @@
 MÓDULO 1: REGISTRO DE PRUEBAS DIAGNÓSTICAS
 --------------------------------------------
 Digitaliza el Anexo 1 (formato en papel que llenan los ColVol).
+
 Diseñado para que el supervisor digite RÁPIDO: campos mínimos,
 listas desplegables en vez de texto libre, valores por defecto
 inteligentes (la fecha de hoy, por ejemplo).

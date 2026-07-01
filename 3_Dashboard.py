@@ -192,3 +192,4 @@ st.divider()
 st.subheader("Detalle de todos los registros filtrados")
 st.dataframe(df_filtrado.sort_values("fecha_toma", ascending=False),
              use_container_width=True, hide_index=True)
+             
