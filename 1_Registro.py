@@ -2,20 +2,6 @@
 MÓDULO 1: REGISTRO DE PRUEBAS DIAGNÓSTICAS
 --------------------------------------------
 Digitaliza el Anexo 1 (formato en papel que llenan los ColVol).
-
-Diseñado para que el supervisor digite RÁPIDO: campos mínimos,
-listas desplegables en vez de texto libre, valores por defecto
-inteligentes (la fecha de hoy, por ejemplo).
-
-Supuesto: el supervisor digita por lotes (varios formatos seguidos)
-al llegar a la oficina, no uno por uno en distintos momentos del día.
-Por eso el diseño prioriza una tabla acumulativa en pantalla, para
-que vea su avance y pueda detectar duplicados o errores antes de guardar.
-
-Supuesto geográfico: la localidad, distrito, región y país del registro
-se heredan del ColVol seleccionado (catálogo del Módulo 2), no se
-escriben a mano — así se evitan inconsistencias en los reportes
-distritales y nacionales.
 """
 
 import streamlit as st
@@ -37,12 +23,11 @@ COLUMNS = [
 
 PAISES = ["País X", "País Y", "País Z"]
 
-# --- Carga del catálogo de ColVol (Módulo 2) ---
+# --- Carga del catálogo de ColVol ---
 if os.path.exists(COLVOL_FILE):
     df_colvol = pd.read_csv(COLVOL_FILE)
     df_colvol = df_colvol[df_colvol["activo"] == True]
 else:
-    # Si no hay catálogo aún, usamos ejemplos de demostración
     df_colvol = pd.DataFrame([
         {"nombre_colvol": "Juana Pérez", "localidad": "San Martín",
          "distrito": "Distrito Norte", "region": "Región A", "pais": "País X"},
@@ -60,17 +45,16 @@ if "registros" not in st.session_state:
 st.title("📋 Registro de Pruebas Diagnósticas")
 st.caption("Digitaliza el Anexo 1 que llenan los ColVol en papel.")
 
-# --- Selector de ColVol fuera del form para que el autorrelleno funcione en tiempo real ---
+# --- Selector de ColVol FUERA del form para autorrelleno en tiempo real ---
 nombres_colvol = ["— Selecciona un ColVol —"] + list(df_colvol["nombre_colvol"].values)
 colvol_sel = st.selectbox("ColVol que realizó la prueba", nombres_colvol)
 
-# Autorrelleno de datos geográficos según ColVol seleccionado
 if colvol_sel != "— Selecciona un ColVol —":
     fila_colvol = df_colvol[df_colvol["nombre_colvol"] == colvol_sel].iloc[0]
     localidad_auto = fila_colvol["localidad"]
-    distrito_auto = fila_colvol["distrito"]
-    region_auto = fila_colvol["region"]
-    pais_auto = fila_colvol["pais"]
+    distrito_auto  = fila_colvol["distrito"]
+    region_auto    = fila_colvol["region"]
+    pais_auto      = fila_colvol["pais"]
     st.info(f"📍 **{colvol_sel}** — {localidad_auto}, {distrito_auto}, {region_auto}, {pais_auto}")
 else:
     localidad_auto = distrito_auto = region_auto = pais_auto = ""
@@ -81,16 +65,16 @@ with st.form("form_registro", clear_on_submit=True):
     col1, col2, col3 = st.columns(3)
 
     with col1:
-        fecha_toma = st.date_input("Fecha de toma", value=date.today())
+        fecha_toma     = st.date_input("Fecha de toma", value=date.today())
         codigo_muestra = st.text_input("Código de muestra")
-        motivo = st.selectbox("Motivo", ["Sospechoso", "Conviviente", "Seguimiento"])
+        motivo         = st.selectbox("Motivo", ["Sospechoso", "Conviviente", "Seguimiento"])
 
     with col2:
-        nombre = st.text_input("Nombre completo del paciente")
+        nombre         = st.text_input("Nombre completo del paciente")
         identificacion = st.text_input("Identificación")
-        nacionalidad = st.selectbox("Nacionalidad", PAISES)
-        sexo = st.selectbox("Sexo", ["Masculino", "Femenino"])
-        fecha_nac = st.date_input(
+        nacionalidad   = st.selectbox("Nacionalidad", PAISES)
+        sexo           = st.selectbox("Sexo", ["Masculino", "Femenino"])
+        fecha_nac      = st.date_input(
             "Fecha de nacimiento",
             value=date(2000, 1, 1),
             min_value=date(1900, 1, 1),
@@ -103,12 +87,14 @@ with st.form("form_registro", clear_on_submit=True):
             ["P.v (Plasmodium vivax)", "P.f (Plasmodium falciparum)", "Negativa", "Inválida"]
         )
         tipo_busqueda = st.selectbox("Tipo de búsqueda", ["Pasiva", "Proactiva", "Reactiva"])
-        tomo_medicamento = st.radio(
-            "¿Ha tomado algún medicamento?", ["No", "Sí"], horizontal=True
-        )
-        medicamento_detalle = ""
-        if tomo_medicamento == "Sí":
-            medicamento_detalle = st.text_input("Anota cuál:")
+
+    st.divider()
+    tomo_medicamento   = st.radio(
+        "¿Ha tomado algún medicamento?", ["No", "Sí"], horizontal=True
+    )
+    medicamento_detalle = st.text_input(
+        "Anota cuál medicamento: (deja vacío si no aplica)"
+    )
 
     submitted = st.form_submit_button("➕ Agregar registro", use_container_width=True)
 
@@ -120,10 +106,9 @@ with st.form("form_registro", clear_on_submit=True):
             errores.append("El nombre completo del paciente es obligatorio.")
         if not codigo_muestra:
             errores.append("El código de muestra es obligatorio.")
-        # Detección de código de muestra duplicado
         if codigo_muestra and len(st.session_state.registros) > 0:
             if codigo_muestra in st.session_state.registros["codigo_muestra"].values:
-                errores.append(f"⚠️ El código de muestra '{codigo_muestra}' ya fue registrado antes.")
+                errores.append(f"⚠️ El código '{codigo_muestra}' ya fue registrado antes.")
 
         if errores:
             for e in errores:
@@ -160,7 +145,6 @@ st.subheader(f"Registros digitados en esta sesión ({len(st.session_state.regist
 if len(st.session_state.registros) > 0:
     st.dataframe(st.session_state.registros, use_container_width=True, hide_index=True)
 
-    # Alerta de casos positivos: el supervisor debe iniciar tratamiento
     positivos = st.session_state.registros[
         st.session_state.registros["resultado_pdr"].str.contains("P.v|P.f", na=False)
     ]
