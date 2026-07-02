@@ -15,9 +15,10 @@ pero los niveles regional y nacional necesitan agregados comparables entre
 distritos. Por eso el filtro va de lo general (país) a lo específico
 (distrito), permitiendo "drill-down".
 
-Notificación de positivos: se usa mailto (link de email pre-rellenado) porque
-no requiere APIs de pago, no necesita mantenimiento técnico, es trazable y es
-el canal formal apropiado para comunicación interinstitucional con Ministerios.
+Se incluye lista de positivos y detalle de los filtrados para seguimiento del supervisor..
+La lista de positivos se puede descargar y enviar por correo a los funcionarios de salud, locales, regionales o nacionales
+segun corresponda, para que se tomen acciones de seguimiento y control de brotes.
+
 """
 
 import streamlit as st
