@@ -150,39 +150,6 @@ st.subheader(f"🔴 Detalle de registros positivos ({len(df_positivos)} casos)")
 if len(df_positivos) > 0:
     st.dataframe(df_positivos, use_container_width=True, hide_index=True)
 
-    # --- Notificación por email (mailto: no requiere API ni costo) ---
-    st.markdown("**📧 Notificar casos positivos al Programa de Malaria**")
-    email_destino = st.text_input(
-        "Correo del funcionario del Ministerio de Salud",
-        placeholder="funcionario@minsa.gob.xx"
-    )
-
-    if email_destino:
-        # Armar el cuerpo del email con la lista de positivos
-        filas_email = []
-        for _, r in df_positivos.iterrows():
-            filas_email.append(
-                f"- {r['nombre_completo']} | {r['resultado_pdr']} | "
-                f"{r['distrito']}, {r['region']}, {r['pais']} | Fecha: {r['fecha_toma']}"
-            )
-        cuerpo = (
-            f"Estimado/a,\n\n"
-            f"Se reportan {len(df_positivos)} caso(s) positivo(s) de malaria "
-            f"en el período {rango_fechas[0]} al {rango_fechas[1]}:\n\n"
-            + "\n".join(filas_email) +
-            "\n\nEste reporte fue generado automáticamente desde el sistema de vigilancia ColVol."
-        )
-        asunto = f"Reporte casos positivos malaria — {date.today()}"
-        mailto = (
-            f"mailto:{email_destino}"
-            f"?subject={urllib.parse.quote(asunto)}"
-            f"&body={urllib.parse.quote(cuerpo)}"
-        )
-        st.link_button("📨 Abrir correo pre-rellenado", mailto, use_container_width=True)
-        st.caption(
-            "Al hacer clic se abre tu cliente de correo (Outlook, Gmail, etc.) "
-            "con el asunto y la lista de positivos ya escritos. Solo tienes que enviar."
-        )
 else:
     st.success("✅ No hay casos positivos en el período y filtros seleccionados.")
 
